@@ -1,91 +1,46 @@
-/**
- * Generate secure URL-friendly unique ID.
- *
- * By default, the ID will have 21 symbols to have a collision probability
- * similar to UUID v4.
- *
- * ```js
- * import { nanoid } from 'nanoid'
- * model.id = nanoid() //=> "Uakgb_J5m9g-0JDMbcJqL"
- * ```
- *
- * @param size Size of the ID. The default size is 21.
- * @returns A random string.
- */
-export function nanoid(size?: number): string
+//#region src/utils.d.ts
 
-/**
- * Generate secure unique ID with custom alphabet.
- *
- * Alphabet must contain 256 symbols or less. Otherwise, the generator
- * will not be secure.
- *
- * @param alphabet Alphabet used to generate the ID.
- * @param defaultSize Size of the ID. The default size is 21.
- * @returns A random string generator.
- *
- * ```js
- * const { customAlphabet } = require('nanoid')
- * const nanoid = customAlphabet('0123456789абвгдеё', 5)
- * nanoid() //=> "8ё56а"
- * ```
- */
-export function customAlphabet(
-  alphabet: string,
-  defaultSize?: number
-): (size?: number) => string
+declare const convertPathToPattern: (path: string) => string;
+declare const escapePath: (path: string) => string;
+// #endregion
+// #region isDynamicPattern
+/*
+Has a few minor differences with `fast-glob` for better accuracy:
 
-/**
- * Generate unique ID with custom random generator and alphabet.
- *
- * Alphabet must contain 256 symbols or less. Otherwise, the generator
- * will not be secure.
- *
- * ```js
- * import { customRandom } from 'nanoid/format'
- *
- * const nanoid = customRandom('abcdef', 5, size => {
- *   const random = []
- *   for (let i = 0; i < size; i++) {
- *     random.push(randomByte())
- *   }
- *   return random
- * })
- *
- * nanoid() //=> "fbaef"
- * ```
- *
- * @param alphabet Alphabet used to generate a random string.
- * @param size Size of the random string.
- * @param random A random bytes generator.
- * @returns A random string generator.
- */
-export function customRandom(
-  alphabet: string,
-  size: number,
-  random: (bytes: number) => Uint8Array
-): () => string
+Doesn't necessarily return false on patterns that include `\\`.
 
-/**
- * URL safe symbols.
- *
- * ```js
- * import { urlAlphabet } from 'nanoid'
- * const nanoid = customAlphabet(urlAlphabet, 10)
- * nanoid() //=> "Uakgb_J5m9"
- * ```
- */
-export const urlAlphabet: string
+Returns true if the pattern includes parentheses,
+regardless of them representing one single pattern or not.
 
-/**
- * Generate an array of random bytes collected from hardware noise.
- *
- * ```js
- * import { customRandom, random } from 'nanoid'
- * const nanoid = customRandom("abcdef", 5, random)
- * ```
- *
- * @param bytes Size of the array.
- * @returns An array of random bytes.
- */
-export function random(bytes: number): Uint8Array
+Returns true for unfinished glob extensions i.e. `(h`, `+(h`.
+
+Returns true for unfinished brace expansions as long as they include `,` or `..`.
+*/
+declare function isDynamicPattern(pattern: string, options?: {
+  caseSensitiveMatch: boolean;
+}): boolean; //#endregion
+//#region src/index.d.ts
+
+// #endregion
+// #region log
+interface GlobOptions {
+  absolute?: boolean;
+  cwd?: string;
+  patterns?: string | string[];
+  ignore?: string | string[];
+  dot?: boolean;
+  deep?: number;
+  followSymbolicLinks?: boolean;
+  caseSensitiveMatch?: boolean;
+  expandDirectories?: boolean;
+  onlyDirectories?: boolean;
+  onlyFiles?: boolean;
+  debug?: boolean;
+}
+declare function glob(patterns: string | string[], options?: Omit<GlobOptions, "patterns">): Promise<string[]>;
+declare function glob(options: GlobOptions): Promise<string[]>;
+declare function globSync(patterns: string | string[], options?: Omit<GlobOptions, "patterns">): string[];
+declare function globSync(options: GlobOptions): string[];
+
+//#endregion
+export { GlobOptions, convertPathToPattern, escapePath, glob, globSync, isDynamicPattern };

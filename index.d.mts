@@ -1,134 +1,46 @@
-/// <reference types="node" />
-import picomatch from "picomatch";
+//#region src/utils.d.ts
 
-//#region src/api/queue.d.ts
-type OnQueueEmptyCallback = (error: Error | null, output: WalkerState) => void;
-/**
- * This is a custom stateless queue to track concurrent async fs calls.
- * It increments a counter whenever a call is queued and decrements it
- * as soon as it completes. When the counter hits 0, it calls onQueueEmpty.
- */
-declare class Queue {
-  private onQueueEmpty?;
-  count: number;
-  constructor(onQueueEmpty?: OnQueueEmptyCallback | undefined);
-  enqueue(): number;
-  dequeue(error: Error | null, output: WalkerState): void;
-}
-//#endregion
-//#region src/types.d.ts
-type Counts = {
-  files: number;
-  directories: number;
-  /**
-   * @deprecated use `directories` instead. Will be removed in v7.0.
-   */
-  dirs: number;
-};
-type Group = {
-  directory: string;
-  files: string[];
-  /**
-   * @deprecated use `directory` instead. Will be removed in v7.0.
-   */
-  dir: string;
-};
-type GroupOutput = Group[];
-type OnlyCountsOutput = Counts;
-type PathsOutput = string[];
-type Output = OnlyCountsOutput | PathsOutput | GroupOutput;
-type WalkerState = {
-  root: string;
-  paths: string[];
-  groups: Group[];
-  counts: Counts;
-  options: Options;
-  queue: Queue;
-  controller: AbortController;
-  symlinks: Map<string, string>;
-  visited: string[];
-};
-type ResultCallback<TOutput extends Output> = (error: Error | null, output: TOutput) => void;
-type FilterPredicate = (path: string, isDirectory: boolean) => boolean;
-type ExcludePredicate = (dirName: string, dirPath: string) => boolean;
-type PathSeparator = "/" | "\\";
-type Options<TGlobFunction = unknown> = {
-  includeBasePath?: boolean;
-  includeDirs?: boolean;
-  normalizePath?: boolean;
-  maxDepth: number;
-  maxFiles?: number;
-  resolvePaths?: boolean;
-  suppressErrors: boolean;
-  group?: boolean;
-  onlyCounts?: boolean;
-  filters: FilterPredicate[];
-  resolveSymlinks?: boolean;
-  useRealPaths?: boolean;
-  excludeFiles?: boolean;
-  excludeSymlinks?: boolean;
-  exclude?: ExcludePredicate;
-  relativePaths?: boolean;
-  pathSeparator: PathSeparator;
-  signal?: AbortSignal;
-  globFunction?: TGlobFunction;
-};
-type GlobMatcher = (test: string) => boolean;
-type GlobFunction = (glob: string | string[], ...params: unknown[]) => GlobMatcher;
-type GlobParams<T> = T extends ((globs: string | string[], ...params: infer TParams extends unknown[]) => GlobMatcher) ? TParams : [];
-//#endregion
-//#region src/builder/api-builder.d.ts
-declare class APIBuilder<TReturnType extends Output> {
-  private readonly root;
-  private readonly options;
-  constructor(root: string, options: Options);
-  withPromise(): Promise<TReturnType>;
-  withCallback(cb: ResultCallback<TReturnType>): void;
-  sync(): TReturnType;
-}
-//#endregion
-//#region src/builder/index.d.ts
-declare class Builder<TReturnType extends Output = PathsOutput, TGlobFunction = typeof picomatch> {
-  private readonly globCache;
-  private options;
-  private globFunction?;
-  constructor(options?: Partial<Options<TGlobFunction>>);
-  group(): Builder<GroupOutput, TGlobFunction>;
-  withPathSeparator(separator: "/" | "\\"): this;
-  withBasePath(): this;
-  withRelativePaths(): this;
-  withDirs(): this;
-  withMaxDepth(depth: number): this;
-  withMaxFiles(limit: number): this;
-  withFullPaths(): this;
-  withErrors(): this;
-  withSymlinks({
-    resolvePaths
-  }?: {
-    resolvePaths?: boolean | undefined;
-  }): this;
-  withAbortSignal(signal: AbortSignal): this;
-  normalize(): this;
-  filter(predicate: FilterPredicate): this;
-  onlyDirs(): this;
-  exclude(predicate: ExcludePredicate): this;
-  onlyCounts(): Builder<OnlyCountsOutput, TGlobFunction>;
-  crawl(root?: string): APIBuilder<TReturnType>;
-  withGlobFunction<TFunc>(fn: TFunc): Builder<TReturnType, TFunc>;
-  /**
-   * @deprecated Pass options using the constructor instead:
-   * ```ts
-   * new fdir(options).crawl("/path/to/root");
-   * ```
-   * This method will be removed in v7.0
-   */
-  crawlWithOptions(root: string, options: Partial<Options<TGlobFunction>>): APIBuilder<TReturnType>;
-  glob(...patterns: string[]): Builder<TReturnType, TGlobFunction>;
-  globWithOptions(patterns: string[]): Builder<TReturnType, TGlobFunction>;
-  globWithOptions(patterns: string[], ...options: GlobParams<TGlobFunction>): Builder<TReturnType, TGlobFunction>;
-}
-//#endregion
+declare const convertPathToPattern: (path: string) => string;
+declare const escapePath: (path: string) => string;
+// #endregion
+// #region isDynamicPattern
+/*
+Has a few minor differences with `fast-glob` for better accuracy:
+
+Doesn't necessarily return false on patterns that include `\\`.
+
+Returns true if the pattern includes parentheses,
+regardless of them representing one single pattern or not.
+
+Returns true for unfinished glob extensions i.e. `(h`, `+(h`.
+
+Returns true for unfinished brace expansions as long as they include `,` or `..`.
+*/
+declare function isDynamicPattern(pattern: string, options?: {
+  caseSensitiveMatch: boolean;
+}): boolean; //#endregion
 //#region src/index.d.ts
-type Fdir = typeof Builder;
+
+// #endregion
+// #region log
+interface GlobOptions {
+  absolute?: boolean;
+  cwd?: string;
+  patterns?: string | string[];
+  ignore?: string | string[];
+  dot?: boolean;
+  deep?: number;
+  followSymbolicLinks?: boolean;
+  caseSensitiveMatch?: boolean;
+  expandDirectories?: boolean;
+  onlyDirectories?: boolean;
+  onlyFiles?: boolean;
+  debug?: boolean;
+}
+declare function glob(patterns: string | string[], options?: Omit<GlobOptions, "patterns">): Promise<string[]>;
+declare function glob(options: GlobOptions): Promise<string[]>;
+declare function globSync(patterns: string | string[], options?: Omit<GlobOptions, "patterns">): string[];
+declare function globSync(options: GlobOptions): string[];
+
 //#endregion
-export { Counts, ExcludePredicate, Fdir, FilterPredicate, GlobFunction, GlobMatcher, GlobParams, Group, GroupOutput, OnlyCountsOutput, Options, Output, PathSeparator, PathsOutput, ResultCallback, WalkerState, Builder as fdir };
+export { GlobOptions, convertPathToPattern, escapePath, glob, globSync, isDynamicPattern };
