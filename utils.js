@@ -1,37 +1,72 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.normalizePath = exports.isRootDirectory = exports.convertSlashes = exports.cleanPath = void 0;
-const path_1 = require("path");
-function cleanPath(path) {
-    let normalized = (0, path_1.normalize)(path);
-    // we have to remove the last path separator
-    // to account for / root path
-    if (normalized.length > 1 && normalized[normalized.length - 1] === path_1.sep)
-        normalized = normalized.substring(0, normalized.length - 1);
-    return normalized;
-}
-exports.cleanPath = cleanPath;
-const SLASHES_REGEX = /[\\/]/g;
-function convertSlashes(path, separator) {
-    return path.replace(SLASHES_REGEX, separator);
-}
-exports.convertSlashes = convertSlashes;
-const WINDOWS_ROOT_DIR_REGEX = /^[a-z]:[\\/]$/i;
-function isRootDirectory(path) {
-    return path === "/" || WINDOWS_ROOT_DIR_REGEX.test(path);
-}
-exports.isRootDirectory = isRootDirectory;
-function normalizePath(path, options) {
-    const { resolvePaths, normalizePath, pathSeparator } = options;
-    const pathNeedsCleaning = (process.platform === "win32" && path.includes("/")) ||
-        path.startsWith(".");
-    if (resolvePaths)
-        path = (0, path_1.resolve)(path);
-    if (normalizePath || pathNeedsCleaning)
-        path = cleanPath(path);
-    if (path === ".")
-        return "";
-    const needsSeperator = path[path.length - 1] !== pathSeparator;
-    return convertSlashes(needsSeperator ? path + pathSeparator : path, pathSeparator);
-}
-exports.normalizePath = normalizePath;
+/*global navigator*/
+'use strict';
+
+const {
+  REGEX_BACKSLASH,
+  REGEX_REMOVE_BACKSLASH,
+  REGEX_SPECIAL_CHARS,
+  REGEX_SPECIAL_CHARS_GLOBAL
+} = require('./constants');
+
+exports.isObject = val => val !== null && typeof val === 'object' && !Array.isArray(val);
+exports.hasRegexChars = str => REGEX_SPECIAL_CHARS.test(str);
+exports.isRegexChar = str => str.length === 1 && exports.hasRegexChars(str);
+exports.escapeRegex = str => str.replace(REGEX_SPECIAL_CHARS_GLOBAL, '\\$1');
+exports.toPosixSlashes = str => str.replace(REGEX_BACKSLASH, '/');
+
+exports.isWindows = () => {
+  if (typeof navigator !== 'undefined' && navigator.platform) {
+    const platform = navigator.platform.toLowerCase();
+    return platform === 'win32' || platform === 'windows';
+  }
+
+  if (typeof process !== 'undefined' && process.platform) {
+    return process.platform === 'win32';
+  }
+
+  return false;
+};
+
+exports.removeBackslashes = str => {
+  return str.replace(REGEX_REMOVE_BACKSLASH, match => {
+    return match === '\\' ? '' : match;
+  });
+};
+
+exports.escapeLast = (input, char, lastIdx) => {
+  const idx = input.lastIndexOf(char, lastIdx);
+  if (idx === -1) return input;
+  if (input[idx - 1] === '\\') return exports.escapeLast(input, char, idx - 1);
+  return `${input.slice(0, idx)}\\${input.slice(idx)}`;
+};
+
+exports.removePrefix = (input, state = {}) => {
+  let output = input;
+  if (output.startsWith('./')) {
+    output = output.slice(2);
+    state.prefix = './';
+  }
+  return output;
+};
+
+exports.wrapOutput = (input, state = {}, options = {}) => {
+  const prepend = options.contains ? '' : '^';
+  const append = options.contains ? '' : '$';
+
+  let output = `${prepend}(?:${input})${append}`;
+  if (state.negated === true) {
+    output = `(?:^(?!${output}).*$)`;
+  }
+  return output;
+};
+
+exports.basename = (path, { windows } = {}) => {
+  const segs = path.split(windows ? /[\\/]/ : '/');
+  const last = segs[segs.length - 1];
+
+  if (last === '') {
+    return segs[segs.length - 2];
+  }
+
+  return last;
+};
