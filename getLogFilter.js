@@ -7,6 +7,10 @@
 
 	Released under the MIT License.
 */
+'use strict';
+
+Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+
 const getLogFilter = filters => {
     if (filters.length === 0)
         return () => true;
@@ -61,4 +65,5 @@ const testFilter = (log, key, parts) => {
     return value.endsWith(parts[lastPartIndex]);
 };
 
-export { getLogFilter };
+exports.getLogFilter = getLogFilter;
+//# sourceMappingURL=getLogFilter.js.map
