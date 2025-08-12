@@ -1,48 +1,90 @@
 {
-  "name": "esbuild",
-  "version": "0.25.5",
-  "description": "An extremely fast JavaScript and CSS bundler and minifier.",
+  "name": "fdir",
+  "version": "6.4.6",
+  "description": "The fastest directory crawler & globbing alternative to glob, fast-glob, & tiny-glob. Crawls 1m files in < 1s",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "prepublishOnly": "npm run test && npm run build",
+    "build": "tsc",
+    "format": "prettier --write src __tests__ benchmarks",
+    "test": "vitest run __tests__/",
+    "test:coverage": "vitest run --coverage __tests__/",
+    "test:watch": "vitest __tests__/",
+    "bench": "ts-node benchmarks/benchmark.js",
+    "bench:glob": "ts-node benchmarks/glob-benchmark.ts",
+    "bench:fdir": "ts-node benchmarks/fdir-benchmark.ts",
+    "release": "./scripts/release.sh"
+  },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/evanw/esbuild.git"
+    "url": "git+https://github.com/thecodrr/fdir.git"
   },
-  "scripts": {
-    "postinstall": "node install.js"
+  "keywords": [
+    "util",
+    "os",
+    "sys",
+    "fs",
+    "walk",
+    "crawler",
+    "directory",
+    "files",
+    "io",
+    "tiny-glob",
+    "glob",
+    "fast-glob",
+    "speed",
+    "javascript",
+    "nodejs"
+  ],
+  "author": "thecodrr <thecodrr@protonmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/thecodrr/fdir/issues"
   },
-  "main": "lib/main.js",
-  "types": "lib/main.d.ts",
-  "engines": {
-    "node": ">=18"
+  "homepage": "https://github.com/thecodrr/fdir#readme",
+  "devDependencies": {
+    "@types/glob": "^8.1.0",
+    "@types/mock-fs": "^4.13.4",
+    "@types/node": "^20.9.4",
+    "@types/picomatch": "^3.0.0",
+    "@types/tap": "^15.0.11",
+    "@vitest/coverage-v8": "^0.34.6",
+    "all-files-in-tree": "^1.1.2",
+    "benny": "^3.7.1",
+    "csv-to-markdown-table": "^1.3.1",
+    "expect": "^29.7.0",
+    "fast-glob": "^3.3.2",
+    "fdir1": "npm:fdir@1.2.0",
+    "fdir2": "npm:fdir@2.1.0",
+    "fdir3": "npm:fdir@3.4.2",
+    "fdir4": "npm:fdir@4.1.0",
+    "fdir5": "npm:fdir@5.0.0",
+    "fs-readdir-recursive": "^1.1.0",
+    "get-all-files": "^4.1.0",
+    "glob": "^10.3.10",
+    "klaw-sync": "^6.0.0",
+    "mock-fs": "^5.2.0",
+    "picomatch": "^4.0.2",
+    "prettier": "^3.5.3",
+    "recur-readdir": "0.0.1",
+    "recursive-files": "^1.0.2",
+    "recursive-fs": "^2.1.0",
+    "recursive-readdir": "^2.2.3",
+    "rrdir": "^12.1.0",
+    "systeminformation": "^5.21.17",
+    "tiny-glob": "^0.2.9",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.3.2",
+    "vitest": "^0.34.6",
+    "walk-sync": "^3.0.0"
   },
-  "bin": {
-    "esbuild": "bin/esbuild"
+  "peerDependencies": {
+    "picomatch": "^3 || ^4"
   },
-  "optionalDependencies": {
-    "@esbuild/aix-ppc64": "0.25.5",
-    "@esbuild/android-arm": "0.25.5",
-    "@esbuild/android-arm64": "0.25.5",
-    "@esbuild/android-x64": "0.25.5",
-    "@esbuild/darwin-arm64": "0.25.5",
-    "@esbuild/darwin-x64": "0.25.5",
-    "@esbuild/freebsd-arm64": "0.25.5",
-    "@esbuild/freebsd-x64": "0.25.5",
-    "@esbuild/linux-arm": "0.25.5",
-    "@esbuild/linux-arm64": "0.25.5",
-    "@esbuild/linux-ia32": "0.25.5",
-    "@esbuild/linux-loong64": "0.25.5",
-    "@esbuild/linux-mips64el": "0.25.5",
-    "@esbuild/linux-ppc64": "0.25.5",
-    "@esbuild/linux-riscv64": "0.25.5",
-    "@esbuild/linux-s390x": "0.25.5",
-    "@esbuild/linux-x64": "0.25.5",
-    "@esbuild/netbsd-arm64": "0.25.5",
-    "@esbuild/netbsd-x64": "0.25.5",
-    "@esbuild/openbsd-arm64": "0.25.5",
-    "@esbuild/openbsd-x64": "0.25.5",
-    "@esbuild/sunos-x64": "0.25.5",
-    "@esbuild/win32-arm64": "0.25.5",
-    "@esbuild/win32-ia32": "0.25.5",
-    "@esbuild/win32-x64": "0.25.5"
-  },
-  "license": "MIT"
+  "peerDependenciesMeta": {
+    "picomatch": {
+      "optional": true
+    }
+  }
 }
