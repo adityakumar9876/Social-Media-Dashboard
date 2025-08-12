@@ -1,134 +1,91 @@
-/// <reference types="node" />
-import picomatch from "picomatch";
-
-//#region src/api/queue.d.ts
-type OnQueueEmptyCallback = (error: Error | null, output: WalkerState) => void;
 /**
- * This is a custom stateless queue to track concurrent async fs calls.
- * It increments a counter whenever a call is queued and decrements it
- * as soon as it completes. When the counter hits 0, it calls onQueueEmpty.
+ * Generate secure URL-friendly unique ID.
+ *
+ * By default, the ID will have 21 symbols to have a collision probability
+ * similar to UUID v4.
+ *
+ * ```js
+ * import { nanoid } from 'nanoid'
+ * model.id = nanoid() //=> "Uakgb_J5m9g-0JDMbcJqL"
+ * ```
+ *
+ * @param size Size of the ID. The default size is 21.
+ * @returns A random string.
  */
-declare class Queue {
-  private onQueueEmpty?;
-  count: number;
-  constructor(onQueueEmpty?: OnQueueEmptyCallback | undefined);
-  enqueue(): number;
-  dequeue(error: Error | null, output: WalkerState): void;
-}
-//#endregion
-//#region src/types.d.ts
-type Counts = {
-  files: number;
-  directories: number;
-  /**
-   * @deprecated use `directories` instead. Will be removed in v7.0.
-   */
-  dirs: number;
-};
-type Group = {
-  directory: string;
-  files: string[];
-  /**
-   * @deprecated use `directory` instead. Will be removed in v7.0.
-   */
-  dir: string;
-};
-type GroupOutput = Group[];
-type OnlyCountsOutput = Counts;
-type PathsOutput = string[];
-type Output = OnlyCountsOutput | PathsOutput | GroupOutput;
-type WalkerState = {
-  root: string;
-  paths: string[];
-  groups: Group[];
-  counts: Counts;
-  options: Options;
-  queue: Queue;
-  controller: AbortController;
-  symlinks: Map<string, string>;
-  visited: string[];
-};
-type ResultCallback<TOutput extends Output> = (error: Error | null, output: TOutput) => void;
-type FilterPredicate = (path: string, isDirectory: boolean) => boolean;
-type ExcludePredicate = (dirName: string, dirPath: string) => boolean;
-type PathSeparator = "/" | "\\";
-type Options<TGlobFunction = unknown> = {
-  includeBasePath?: boolean;
-  includeDirs?: boolean;
-  normalizePath?: boolean;
-  maxDepth: number;
-  maxFiles?: number;
-  resolvePaths?: boolean;
-  suppressErrors: boolean;
-  group?: boolean;
-  onlyCounts?: boolean;
-  filters: FilterPredicate[];
-  resolveSymlinks?: boolean;
-  useRealPaths?: boolean;
-  excludeFiles?: boolean;
-  excludeSymlinks?: boolean;
-  exclude?: ExcludePredicate;
-  relativePaths?: boolean;
-  pathSeparator: PathSeparator;
-  signal?: AbortSignal;
-  globFunction?: TGlobFunction;
-};
-type GlobMatcher = (test: string) => boolean;
-type GlobFunction = (glob: string | string[], ...params: unknown[]) => GlobMatcher;
-type GlobParams<T> = T extends ((globs: string | string[], ...params: infer TParams extends unknown[]) => GlobMatcher) ? TParams : [];
-//#endregion
-//#region src/builder/api-builder.d.ts
-declare class APIBuilder<TReturnType extends Output> {
-  private readonly root;
-  private readonly options;
-  constructor(root: string, options: Options);
-  withPromise(): Promise<TReturnType>;
-  withCallback(cb: ResultCallback<TReturnType>): void;
-  sync(): TReturnType;
-}
-//#endregion
-//#region src/builder/index.d.ts
-declare class Builder<TReturnType extends Output = PathsOutput, TGlobFunction = typeof picomatch> {
-  private readonly globCache;
-  private options;
-  private globFunction?;
-  constructor(options?: Partial<Options<TGlobFunction>>);
-  group(): Builder<GroupOutput, TGlobFunction>;
-  withPathSeparator(separator: "/" | "\\"): this;
-  withBasePath(): this;
-  withRelativePaths(): this;
-  withDirs(): this;
-  withMaxDepth(depth: number): this;
-  withMaxFiles(limit: number): this;
-  withFullPaths(): this;
-  withErrors(): this;
-  withSymlinks({
-    resolvePaths
-  }?: {
-    resolvePaths?: boolean | undefined;
-  }): this;
-  withAbortSignal(signal: AbortSignal): this;
-  normalize(): this;
-  filter(predicate: FilterPredicate): this;
-  onlyDirs(): this;
-  exclude(predicate: ExcludePredicate): this;
-  onlyCounts(): Builder<OnlyCountsOutput, TGlobFunction>;
-  crawl(root?: string): APIBuilder<TReturnType>;
-  withGlobFunction<TFunc>(fn: TFunc): Builder<TReturnType, TFunc>;
-  /**
-   * @deprecated Pass options using the constructor instead:
-   * ```ts
-   * new fdir(options).crawl("/path/to/root");
-   * ```
-   * This method will be removed in v7.0
-   */
-  crawlWithOptions(root: string, options: Partial<Options<TGlobFunction>>): APIBuilder<TReturnType>;
-  glob(...patterns: string[]): Builder<TReturnType, TGlobFunction>;
-  globWithOptions(patterns: string[]): Builder<TReturnType, TGlobFunction>;
-  globWithOptions(patterns: string[], ...options: GlobParams<TGlobFunction>): Builder<TReturnType, TGlobFunction>;
-}
-//#endregion
-//#region src/index.d.ts
-type Fdir = typeof Builder;
-//#endregion
-export { Counts, ExcludePredicate, Fdir, FilterPredicate, GlobFunction, GlobMatcher, GlobParams, Group, GroupOutput, OnlyCountsOutput, Options, Output, PathSeparator, PathsOutput, ResultCallback, WalkerState, Builder as fdir };
+export function nanoid(size?: number): string
+
+/**
+ * Generate secure unique ID with custom alphabet.
+ *
+ * Alphabet must contain 256 symbols or less. Otherwise, the generator
+ * will not be secure.
+ *
+ * @param alphabet Alphabet used to generate the ID.
+ * @param defaultSize Size of the ID. The default size is 21.
+ * @returns A random string generator.
+ *
+ * ```js
+ * const { customAlphabet } = require('nanoid')
+ * const nanoid = customAlphabet('0123456789абвгдеё', 5)
+ * nanoid() //=> "8ё56а"
+ * ```
+ */
+export function customAlphabet(
+  alphabet: string,
+  defaultSize?: number
+): (size?: number) => string
+
+/**
+ * Generate unique ID with custom random generator and alphabet.
+ *
+ * Alphabet must contain 256 symbols or less. Otherwise, the generator
+ * will not be secure.
+ *
+ * ```js
+ * import { customRandom } from 'nanoid/format'
+ *
+ * const nanoid = customRandom('abcdef', 5, size => {
+ *   const random = []
+ *   for (let i = 0; i < size; i++) {
+ *     random.push(randomByte())
+ *   }
+ *   return random
+ * })
+ *
+ * nanoid() //=> "fbaef"
+ * ```
+ *
+ * @param alphabet Alphabet used to generate a random string.
+ * @param size Size of the random string.
+ * @param random A random bytes generator.
+ * @returns A random string generator.
+ */
+export function customRandom(
+  alphabet: string,
+  size: number,
+  random: (bytes: number) => Uint8Array
+): () => string
+
+/**
+ * URL safe symbols.
+ *
+ * ```js
+ * import { urlAlphabet } from 'nanoid'
+ * const nanoid = customAlphabet(urlAlphabet, 10)
+ * nanoid() //=> "Uakgb_J5m9"
+ * ```
+ */
+export const urlAlphabet: string
+
+/**
+ * Generate an array of random bytes collected from hardware noise.
+ *
+ * ```js
+ * import { customRandom, random } from 'nanoid'
+ * const nanoid = customRandom("abcdef", 5, random)
+ * ```
+ *
+ * @param bytes Size of the array.
+ * @returns An array of random bytes.
+ */
+export function random(bytes: number): Uint8Array

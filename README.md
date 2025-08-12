@@ -1,91 +1,39 @@
-<p align="center">
-<img src="https://github.com/thecodrr/fdir/raw/master/assets/fdir.gif" width="75%"/>
+# Nano ID
 
-<h1 align="center">The Fastest Directory Crawler & Globber for NodeJS</h1>
-<p align="center">
-  <a href="https://www.npmjs.com/package/fdir"><img src="https://img.shields.io/npm/v/fdir?style=for-the-badge"/></a>
-  <a href="https://www.npmjs.com/package/fdir"><img src="https://img.shields.io/npm/dw/fdir?style=for-the-badge"/></a>
-  <a href="https://codeclimate.com/github/thecodrr/fdir/maintainability"><img src="https://img.shields.io/codeclimate/maintainability-percentage/thecodrr/fdir?style=for-the-badge"/></a>
-  <a href="https://coveralls.io/github/thecodrr/fdir?branch=master"><img src="https://img.shields.io/coveralls/github/thecodrr/fdir?style=for-the-badge"/></a>
-  <a href="https://www.npmjs.com/package/fdir"><img src="https://img.shields.io/bundlephobia/minzip/fdir?style=for-the-badge"/></a>
-  <a href="https://www.producthunt.com/posts/fdir-every-millisecond-matters"><img src="https://img.shields.io/badge/ProductHunt-Upvote-red?style=for-the-badge&logo=product-hunt"/></a>
-  <a href="https://dev.to/thecodrr/how-i-wrote-the-fastest-directory-crawler-ever-3p9c"><img src="https://img.shields.io/badge/dev.to-Read%20Blog-black?style=for-the-badge&logo=dev.to"/></a>
-  <a href="./LICENSE"><img src="https://img.shields.io/github/license/thecodrr/fdir?style=for-the-badge"/></a>
-</p>
-</p>
+<img src="https://ai.github.io/nanoid/logo.svg" align="right"
+     alt="Nano ID logo by Anton Lovchikov" width="180" height="94">
 
-⚡ **The Fastest:** Nothing similar (in the NodeJS world) beats `fdir` in speed. It can easily crawl a directory containing **1 million files in < 1 second.**
+**English** | [Русский](./README.ru.md) | [简体中文](./README.zh-CN.md) | [Bahasa Indonesia](./README.id-ID.md)
 
-💡 **Stupidly Easy:** `fdir` uses expressive Builder pattern to build the crawler increasing code readability.
+A tiny, secure, URL-friendly, unique string ID generator for JavaScript.
 
-🤖 **Zero Dependencies\*:** `fdir` only uses NodeJS `fs` & `path` modules.
+> “An amazing level of senseless perfectionism,
+> which is simply impossible not to respect.”
 
-🕺 **Astonishingly Small:** < 2KB in size gzipped & minified.
+* **Small.** 130 bytes (minified and gzipped). No dependencies.
+  [Size Limit] controls the size.
+* **Fast.** It is 2 times faster than UUID.
+* **Safe.** It uses hardware random generator. Can be used in clusters.
+* **Short IDs.** It uses a larger alphabet than UUID (`A-Za-z0-9_-`).
+  So ID size was reduced from 36 to 21 symbols.
+* **Portable.** Nano ID was ported
+  to [20 programming languages](#other-programming-languages).
 
-🖮 **Hackable:** Extending `fdir` is extremely simple now that the new Builder API is here. Feel free to experiment around.
-
-_\* `picomatch` must be installed manually by the user to support globbing._
-
-## 🚄 Quickstart
-
-### Installation
-
-You can install using `npm`:
-
-```sh
-$ npm i fdir
+```js
+import { nanoid } from 'nanoid'
+model.id = nanoid() //=> "V1StGXR8_Z5jdHi6B-myT"
 ```
 
-or Yarn:
+Supports modern browsers, IE [with Babel], Node.js and React Native.
 
-```sh
-$ yarn add fdir
-```
+[online tool]: https://gitpod.io/#https://github.com/ai/nanoid/
+[with Babel]:  https://developer.epages.com/blog/coding/how-to-transpile-node-modules-with-babel-and-webpack-in-a-monorepo/
+[Size Limit]:  https://github.com/ai/size-limit
 
-### Usage
+<a href="https://evilmartians.com/?utm_source=nanoid">
+  <img src="https://evilmartians.com/badges/sponsored-by-evil-martians.svg"
+       alt="Sponsored by Evil Martians" width="236" height="54">
+</a>
 
-```ts
-import { fdir } from "fdir";
-
-// create the builder
-const api = new fdir().withFullPaths().crawl("path/to/dir");
-
-// get all files in a directory synchronously
-const files = api.sync();
-
-// or asynchronously
-api.withPromise().then((files) => {
-  // do something with the result here.
-});
-```
-
-## Documentation:
-
-Documentation for all methods is available [here](/documentation.md).
-
-## 📊 Benchmarks:
-
-Please check the benchmark against the latest version [here](/BENCHMARKS.md).
-
-## 🙏Used by:
-
-`fdir` is downloaded over 200k+ times a week by projects around the world. Here's a list of some notable projects using `fdir` in production:
-
-> Note: if you think your project should be here, feel free to open an issue. Notable is anything with a considerable amount of GitHub stars.
-
-1. [rollup/plugins](https://github.com/rollup/plugins)
-2. [SuperchupuDev/tinyglobby](https://github.com/SuperchupuDev/tinyglobby)
-3. [pulumi/pulumi](https://github.com/pulumi/pulumi)
-4. [dotenvx/dotenvx](https://github.com/dotenvx/dotenvx)
-5. [mdn/yari](https://github.com/mdn/yari)
-6. [streetwriters/notesnook](https://github.com/streetwriters/notesnook)
-7. [imba/imba](https://github.com/imba/imba)
-8. [moroshko/react-scanner](https://github.com/moroshko/react-scanner)
-9. [netlify/build](https://github.com/netlify/build)
-10. [yassinedoghri/astro-i18next](https://github.com/yassinedoghri/astro-i18next)
-11. [selfrefactor/rambda](https://github.com/selfrefactor/rambda)
-12. [whyboris/Video-Hub-App](https://github.com/whyboris/Video-Hub-App)
-
-## 🦮 LICENSE
-
-Copyright &copy; 2024 Abdullah Atta under MIT. [Read full text here.](https://github.com/thecodrr/fdir/raw/master/LICENSE)
+## Docs
+Read full docs **[here](https://github.com/ai/nanoid#readme)**.
